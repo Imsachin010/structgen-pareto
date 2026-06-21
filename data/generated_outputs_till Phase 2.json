@@ -1,0 +1,95 @@
+[
+  {
+    "query": "A person walking a dog in the park",
+    "output": {
+      "scene_description": "A person, likely an adult, is walking their dog, possibly a small to medium-sized breed like a terrier or retriever, through the park's grassy paths and around any playground equipment. The weather is pleasant with partial cloud cover.",
+      "objects": [
+        {
+          "name": "person",
+          "attributes": {
+            "color": "human",
+            "position": "walking"
+          }
+        },
+        {
+          "name": "dog",
+          "attributes": {
+            "color": "canine",
+            "position": "being walked"
+          }
+        },
+        {
+          "name": "playground equipment",
+          "attributes": {
+            "color": "various",
+            "position": "in the park"
+          }
+        }
+      ]
+    },
+    "info": {
+      "error": "validation_error",
+      "details": [
+        "'actions' is a required property"
+      ]
+    }
+  },
+  {
+    "query": "A red car parked near a tree",
+    "output": {
+      "scene_description": "A bright red sports car, a Toyota 86, was parked next to a tall oak tree with sprawling branches. The sun was shining down, casting a warm glow over the scene.",
+      "objects": [
+        {
+          "name": "Toyota 86",
+          "attributes": {
+            "color": "red",
+            "position": "parked near a tree"
+          }
+        },
+        {
+          "name": "tall oak tree",
+          "attributes": {
+            "position": "near the red car"
+          }
+        }
+      ],
+      "actions": [
+        "parked"
+      ]
+    },
+    "info": {
+      "error": "validation_error",
+      "details": [
+        "objects.1.attributes: 'color' is a required property"
+      ]
+    }
+  },
+  {
+    "query": "A group of kids playing football",
+    "output": {
+      "scene_description": "A group of children aged 8-12 are playing a friendly game of football in a local park. They're laughing and having fun, with one kid trying to score a goal.",
+      "objects": [
+        {
+          "name": "Football",
+          "attributes": {
+            "color": "Brown",
+            "position": "On the grass"
+          }
+        },
+        {
+          "name": "Kids",
+          "attributes": {
+            "color": "Various",
+            "position": "Playing on the field"
+          }
+        }
+      ]
+    },
+    "info": {
+      "error": "validation_error",
+      "details": [
+        "'actions' is a required property"
+      ]
+    }
+  }
+]

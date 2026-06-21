@@ -1,0 +1,131 @@
+[
+  {
+    "query": "A person walking a dog in the park",
+    "output": {
+      "scene_description": "A sunny afternoon in a local park, with lush green grass and vibrant flowers.",
+      "objects": [
+        {
+          "name": "person",
+          "attributes": {
+            "color": "",
+            "position": "strolling along a paved path"
+          }
+        },
+        {
+          "name": "dog",
+          "attributes": {
+            "color": "",
+            "position": "attached to a leash"
+          }
+        },
+        {
+          "name": "red car",
+          "attributes": {
+            "color": "red",
+            "position": "parked near a tree"
+          }
+        },
+        {
+          "name": "children",
+          "attributes": {
+            "color": "",
+            "position": "playing football in a field"
+          }
+        }
+      ],
+      "actions": [
+        "walking",
+        "holding onto a leash",
+        "playing football"
+      ]
+    },
+    "info": {
+      "score": 1.0,
+      "alignment_score": 0.2857142857142857,
+      "issues": []
+    }
+  },
+  {
+    "query": "A red car parked near a tree",
+    "output": {
+      "scene_description": "A bright red sedan is parked alongside a tall oak tree, its trunk covered in moss. The sun casts a warm glow on the scene.",
+      "objects": [
+        {
+          "name": "red car",
+          "attributes": {
+            "color": "red",
+            "position": "near a tree"
+          }
+        },
+        {
+          "name": "tall oak tree",
+          "attributes": {
+            "color": "",
+            "position": "near the red car"
+          }
+        }
+      ],
+      "actions": []
+    },
+    "info": {
+      "score": 0.5,
+      "alignment_score": 0.5,
+      "issues": [
+        "no actions"
+      ]
+    }
+  },
+  {
+    "query": "A group of kids playing football",
+    "output": {
+      "scene_description": "A group of kids playing football",
+      "objects": [
+        {
+          "name": "Football",
+          "attributes": {
+            "color": "Brown",
+            "position": "On the field"
+          }
+        },
+        {
+          "name": "Children",
+          "attributes": {
+            "color": "Varied",
+            "position": "On the field"
+          }
+        },
+        {
+          "name": "Tree",
+          "attributes": {
+            "color": "Green",
+            "position": "Near the football field"
+          }
+        },
+        {
+          "name": "Car",
+          "attributes": {
+            "color": "Red",
+            "position": "Parked near a tree"
+          }
+        },
+        {
+          "name": "Dog",
+          "attributes": {
+            "color": "Varied",
+            "position": "Walking with its owner"
+          }
+        }
+      ],
+      "actions": [
+        "Playing football",
+        "Walking the dog",
+        "Parking the car"
+      ]
+    },
+    "info": {
+      "score": 1.0,
+      "alignment_score": 0.16666666666666666,
+      "issues": []
+    }
+  }
+]

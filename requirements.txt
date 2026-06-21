@@ -1,0 +1,14 @@
+# Existing (keep)
+ollama
+sentence-transformers
+scikit-learn
+jsonschema
+numpy
+tqdm
+
+# New for BDA extension
+pyRAPL>=0.2.3
+zeus-ml>=0.9.0
+pynvml>=11.0.0
+pandas>=2.0.0
+matplotlib>=3.7.0
