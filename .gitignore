@@ -28,3 +28,10 @@ __pycache__/
 
 #unneccesary files
 updated/*
+
+# Results and Local Data
+tables/
+figures/
+logs/
+docs/
+data/queries/expanded_queries.json

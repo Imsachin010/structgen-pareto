@@ -31,6 +31,11 @@ except Exception:
     print("[instrument] PyRAPL not available — CPU energy will be None.")
 
 try:
+    # Patch Zeus to not require PyTorch CUDA sync (since Ollama runs separately)
+    # Must be done BEFORE importing ZeusMonitor
+    import zeus.utils.framework
+    zeus.utils.framework.sync_execution = lambda *args, **kwargs: None
+    
     from zeus.monitor import ZeusMonitor
     _ZEUS_AVAILABLE = True
 except Exception:
@@ -143,7 +148,7 @@ class ResourceMonitor:
         self._zeus      = None
         if _ZEUS_AVAILABLE:
             try:
-                self._zeus = ZeusMonitor(gpu_indices=[gpu_index])
+                self._zeus = ZeusMonitor(gpu_indices=[gpu_index], approx_instant_energy=True)
             except Exception as e:
                 print(f"[instrument] Zeus init failed: {e}")
 
@@ -187,8 +192,12 @@ class ResourceMonitor:
             if self._zeus:
                 try:
                     measurement = self._zeus.end_window(zeus_label)
-                    # Zeus returns total_energy in Joules per GPU
-                    joules = measurement.total_energy.get(self._gpu_index, None)
+                    # Zeus returns total_energy in Joules per GPU or as a single float
+                    if hasattr(measurement.total_energy, "get"):
+                        joules = measurement.total_energy.get(self._gpu_index, None)
+                    else:
+                        joules = float(measurement.total_energy)
+                        
                     if joules is not None:
                         record.gpu_energy_mj = joules * 1000.0  # J → mJ
                 except Exception as e:

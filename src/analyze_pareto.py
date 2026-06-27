@@ -1,6 +1,6 @@
 """
 analyze_pareto.py
-─────────────────
+-----------------
 Loads JSONL logs from run_scale_experiment.py and produces:
   - Summary table (Table 2 equivalent for BDA paper)
   - Resource breakdown table (Table 3)
@@ -29,7 +29,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
-# ── Plot style ────────────────────────────────────────────────────────────────
+# -- Plot style ----------------------------------------------------------------
 plt.rcParams.update({
     "font.family":      "serif",
     "font.size":        11,
@@ -174,7 +174,7 @@ def aggregate_by_config(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_marginal_utility(agg: pd.DataFrame) -> pd.DataFrame:
-    """Compute incremental reliability gain and resource cost per step C1→C2→C3→C4."""
+    """Compute incremental reliability gain and resource cost per step C1->C2->C3->C4."""
     rows = []
     configs = [c for c in CONFIG_ORDER if c in agg.index]
     for i in range(1, len(configs)):
@@ -189,7 +189,7 @@ def compute_marginal_utility(agg: pd.DataFrame) -> pd.DataFrame:
                       else np.nan)
 
         rows.append({
-            "transition":           f"{prev}→{curr}",
+            "transition":           f"{prev}->{curr}",
             "delta_validity_pp":    delta_validity,
             "delta_energy_mj":      delta_energy,
             "delta_latency_ms":     delta_latency,
@@ -236,7 +236,7 @@ def fig_pareto(agg: pd.DataFrame, pareto: list[str], out: Path):
     fig, ax = plt.subplots(figsize=(7, 5))
 
     configs = [c for c in CONFIG_ORDER if c in agg.index]
-    xs = [agg.loc[c, "gpu_energy_mean_mj"]     for c in configs]
+    xs = [agg.loc[c, "gpu_energy_mean_mj"] / 1000 for c in configs]
     ys = [agg.loc[c, "schema_validity_pct"]     for c in configs]
 
     for c, x, y in zip(configs, xs, ys):
@@ -248,12 +248,23 @@ def fig_pareto(agg: pd.DataFrame, pareto: list[str], out: Path):
                    edgecolors="black" if is_pareto else "none",
                    linewidths=1.5 if is_pareto else 0,
                    marker="*" if is_pareto else "o")
+        
+        # Custom offsets to prevent labels from overlapping each other or the points
+        if c == "C1":
+            offset = (-30, 10)  # above-left
+        elif c == "C2":
+            offset = (10, -15)  # below-right
+        elif c == "C3":
+            offset = (10, 10)   # above-right
+        else: # C4
+            offset = (-40, -15) # below-left
+
         ax.annotate(CONFIG_LABELS[c], (x, y),
-                    textcoords="offset points", xytext=(8, 4), fontsize=9)
+                    textcoords="offset points", xytext=offset, fontsize=9)
 
     # Draw Pareto frontier line
     pareto_pts = sorted(
-        [(agg.loc[c, "gpu_energy_mean_mj"], agg.loc[c, "schema_validity_pct"])
+        [(agg.loc[c, "gpu_energy_mean_mj"] / 1000, agg.loc[c, "schema_validity_pct"])
          for c in pareto],
         key=lambda p: p[0]
     )
@@ -261,7 +272,7 @@ def fig_pareto(agg: pd.DataFrame, pareto: list[str], out: Path):
         px, py = zip(*pareto_pts)
         ax.plot(px, py, "k--", linewidth=1.2, alpha=0.6, label="Pareto frontier")
 
-    ax.set_xlabel("Mean GPU Energy per Query (mJ)")
+    ax.set_xlabel("Mean GPU Energy per Query (Joules)")
     ax.set_ylabel("Schema Validity Rate (%)")
     ax.set_title("Reliability–Energy Tradeoff: Pareto Frontier")
 
@@ -269,7 +280,7 @@ def fig_pareto(agg: pd.DataFrame, pareto: list[str], out: Path):
     ax.legend(handles=[
         mpatches.Patch(color=CONFIG_COLORS[c], label=CONFIG_LABELS[c])
         for c in configs
-    ] + [star_patch], loc="lower right", fontsize=9)
+    ] + [star_patch], loc="center left", fontsize=9)
 
     plt.tight_layout()
     plt.savefig(out)
@@ -341,7 +352,7 @@ def fig_alignment_by_config(agg: pd.DataFrame, out: Path):
     ax.set_xticklabels([CONFIG_LABELS[c] for c in configs], rotation=20, ha="right")
     ax.set_ylabel("Mean Query-Object Alignment Score")
     ax.set_title("Semantic Alignment by Configuration")
-    ax.set_ylim(0.8, 1.0)
+    ax.set_ylim(0.0, 1.0)
 
     for xi, (m, s) in enumerate(zip(means, stds)):
         ax.text(xi, m + s + 0.003, f"{m:.3f}", ha="center", fontsize=9)
@@ -359,12 +370,16 @@ def fig_resource_breakdown(agg: pd.DataFrame, out: Path):
 
     metrics = [
         ("latency_mean_ms",    "Mean Latency (ms)",              axes[0]),
-        ("gpu_energy_mean_mj", "Mean GPU Energy/Query (mJ)",     axes[1]),
+        ("gpu_energy_mean_mj", "Mean GPU Energy/Query (Joules)", axes[1]),
         ("total_tokens_mean",  "Mean Total Tokens/Query",        axes[2]),
     ]
 
     for col, label, ax in metrics:
-        vals   = [agg.loc[c, col] for c in configs]
+        if col == "gpu_energy_mean_mj":
+            vals = [agg.loc[c, col] / 1000 for c in configs]
+        else:
+            vals = [agg.loc[c, col] for c in configs]
+        
         colors = [CONFIG_COLORS[c] for c in configs]
         x      = np.arange(len(configs))
         bars   = ax.bar(x, vals, color=colors, edgecolor="white", width=0.5)
@@ -379,6 +394,97 @@ def fig_resource_breakdown(agg: pd.DataFrame, out: Path):
                         f"{val:.0f}", ha="center", fontsize=9)
 
     plt.suptitle("Resource Consumption by Configuration", fontsize=11)
+    plt.tight_layout()
+    plt.savefig(out)
+    plt.close()
+    print(f"Saved: {out}")
+
+
+def fig_energy_variance(df: pd.DataFrame, out: Path):
+    """Figure 5: Violin plot of GPU energy across configs."""
+    configs = [c for c in CONFIG_ORDER if c in df["config_id"].unique()]
+    data = [df[(df["config_id"] == c) & df["gpu_energy_mj"].notna()]["gpu_energy_mj"] / 1000 for c in configs]
+    
+    if not any(len(d) > 0 for d in data):
+        return
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+    parts = ax.violinplot(data, showmeans=True, showmedians=False)
+    
+    for pc, c in zip(parts['bodies'], configs):
+        pc.set_facecolor(CONFIG_COLORS[c])
+        pc.set_edgecolor('black')
+        pc.set_alpha(0.7)
+    
+    ax.set_xticks(np.arange(1, len(configs) + 1))
+    ax.set_xticklabels([CONFIG_LABELS[c] for c in configs])
+    ax.set_ylabel("GPU Energy per Query (Joules)")
+    ax.set_title("Energy Consumption Variance")
+    plt.tight_layout()
+    plt.savefig(out)
+    plt.close()
+    print(f"Saved: {out}")
+
+def fig_latency_variance(df: pd.DataFrame, out: Path):
+    """Figure 6: Box plot of latency across configs."""
+    configs = [c for c in CONFIG_ORDER if c in df["config_id"].unique()]
+    data = [df[(df["config_id"] == c) & df["latency_ms"].notna()]["latency_ms"] for c in configs]
+    
+    if not any(len(d) > 0 for d in data):
+        return
+
+    fig, ax = plt.subplots(figsize=(7, 5))
+    bplot = ax.boxplot(data, patch_artist=True)
+    
+    for patch, c in zip(bplot['boxes'], configs):
+        patch.set_facecolor(CONFIG_COLORS[c])
+        patch.set_alpha(0.7)
+        
+    ax.set_xticks(np.arange(1, len(configs) + 1))
+    ax.set_xticklabels([CONFIG_LABELS[c] for c in configs], rotation=15, ha='right')
+    ax.set_ylabel("Latency per Query (ms)")
+    ax.set_title("Latency Distribution & Repair Spikes")
+    plt.tight_layout()
+    plt.savefig(out)
+    plt.close()
+    print(f"Saved: {out}")
+
+def fig_repair_distribution(df: pd.DataFrame, out: Path):
+    """Figure 7: Stacked bar chart of repair loop frequency."""
+    configs = ["C2", "C3", "C4"]
+    configs = [c for c in configs if c in df["config_id"].unique()]
+    if not configs:
+        return
+        
+    repair_counts = [0, 1, 2, 3] # Group 3+ as 3
+    
+    counts_dict = {c: [] for c in configs}
+    for c in configs:
+        sub = df[df["config_id"] == c]
+        for rc in repair_counts:
+            if rc == 3:
+                count = len(sub[sub["repair_count"] >= 3])
+            else:
+                count = len(sub[sub["repair_count"] == rc])
+            counts_dict[c].append(count)
+            
+    fig, ax = plt.subplots(figsize=(7, 5))
+    x = np.arange(len(configs))
+    
+    colors = ["#2ca02c", "#ff7f0e", "#d62728", "#9467bd"]
+    labels = ["0 Repairs", "1 Repair", "2 Repairs", "3+ Repairs"]
+    
+    bottoms = np.zeros(len(configs))
+    for i, rc in enumerate(repair_counts):
+        vals = [counts_dict[c][i] for c in configs]
+        ax.bar(x, vals, width=0.5, bottom=bottoms, label=labels[i], color=colors[i], edgecolor='white')
+        bottoms += np.array(vals)
+        
+    ax.set_xticks(x)
+    ax.set_xticklabels([CONFIG_LABELS[c] for c in configs])
+    ax.set_ylabel("Number of Queries")
+    ax.set_title("Repair Loop Frequency")
+    ax.legend()
     plt.tight_layout()
     plt.savefig(out)
     plt.close()
@@ -464,7 +570,7 @@ def main():
     fig_dir   = Path(args.figures);  fig_dir.mkdir(exist_ok=True)
     table_dir = Path(args.tables);   table_dir.mkdir(exist_ok=True)
 
-    # ── Load & process ────────────────────────────────────────────────────────
+    # -- Load & process --------------------------------------------------------
     df      = load_logs(log_dir)
     df      = compute_derived(df)
     agg     = aggregate_by_config(df)
@@ -473,23 +579,23 @@ def main():
 
     print(f"\nPareto-optimal configurations: {pareto}")
 
-    # ── Print summary to console ─────────────────────────────────────────────
-    print("\n── Reliability Summary ──────────────────────────────────────")
+    # -- Print summary to console ---------------------------------------------
+    print("\n-- Reliability Summary --------------------------------------")
     print(agg[["n_queries", "json_validity_pct", "schema_validity_pct",
                "mean_repair_count", "alignment_mean"]].to_string())
 
-    print("\n── Resource Summary ─────────────────────────────────────────")
+    print("\n-- Resource Summary -----------------------------------------")
     print(agg[["latency_mean_ms", "gpu_energy_mean_mj",
                "total_tokens_mean", "cpu_energy_mean_mj"]].to_string())
 
-    print("\n── Marginal Utility ─────────────────────────────────────────")
+    print("\n-- Marginal Utility -----------------------------------------")
     print(marginal.to_string(index=False))
 
-    print("\n── Efficiency ───────────────────────────────────────────────")
+    print("\n-- Efficiency -----------------------------------------------")
     print(agg[["energy_per_valid_mj", "latency_per_valid_ms",
                "tokens_per_valid"]].to_string())
 
-    # ── Figures ───────────────────────────────────────────────────────────────
+    # -- Figures ---------------------------------------------------------------
     p = args.out_prefix
     fig_pareto(agg, pareto,
                fig_dir / f"{p}_fig1_pareto.pdf")
@@ -499,13 +605,19 @@ def main():
                fig_dir / f"{p}_fig3_alignment.pdf")
     fig_resource_breakdown(agg,
                fig_dir / f"{p}_fig4_resources.pdf")
+    fig_energy_variance(df,
+               fig_dir / f"{p}_fig5_energy_variance.pdf")
+    fig_latency_variance(df,
+               fig_dir / f"{p}_fig6_latency_variance.pdf")
+    fig_repair_distribution(df,
+               fig_dir / f"{p}_fig7_repairs.pdf")
 
-    # ── Tables ────────────────────────────────────────────────────────────────
+    # -- Tables ----------------------------------------------------------------
     build_paper_tables(agg, marginal, pareto, table_dir)
 
     print("\n✓ Analysis complete.")
-    print(f"  Figures → {fig_dir.resolve()}")
-    print(f"  Tables  → {table_dir.resolve()}")
+    print(f"  Figures -> {fig_dir.resolve()}")
+    print(f"  Tables  -> {table_dir.resolve()}")
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@ import requests
 
 # ── Ollama config ────────────────────────────────────────────────────────────
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL      = "llama3"          # change to your exact model tag if different
+MODEL      = "llama3:8b"          # change to your exact model tag if different
 TEMP       = 0.8               # higher than inference temp to maximise diversity
 MAX_TOKENS = 256
 
@@ -100,7 +100,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input",  default="raw_queries.json",
                         help="Path to original queries JSON (list of strings or list of dicts with 'query' key)")
-    parser.add_argument("--output", default="queries/expanded_queries.json")
+    parser.add_argument("--output", default="data/queries/expanded_queries.json")
     parser.add_argument("--target", type=int, default=500)
     parser.add_argument("--seed",   type=int, default=42)
     args = parser.parse_args()
@@ -161,7 +161,7 @@ def main():
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(expanded, indent=2))
-    print(f"\nSaved {len(expanded)} queries → {out_path}")
+    print(f"\nSaved {len(expanded)} queries -> {out_path}")
 
     # ── Summary stats ────────────────────────────────────────────────────────
     lengths = [len(q.split()) for q in expanded]

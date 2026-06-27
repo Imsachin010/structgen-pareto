@@ -46,7 +46,7 @@ import requests   # for direct Ollama calls in the stubs below
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_CHAT_URL = "http://localhost:11434/api/chat"
-MODEL = "llama3"   # change to your exact Ollama model tag
+MODEL = "llama3:8b"   # change to your exact Ollama model tag
 
 # ── Schema (standard — same as baseline paper) ────────────────────────────────
 STANDARD_SCHEMA = {
@@ -427,12 +427,12 @@ def run_config(config_id: str, queries: list[str], schema: dict,
                       f"repairs={record.repair_count}  "
                       f"latency={lat}  gpu_energy={gpu}")
 
-    print(f"\nConfig {config_id} complete → {log_path}")
+    print(f"\nConfig {config_id} complete -> {log_path}")
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--queries", default="queries/expanded_queries.json")
+    parser.add_argument("--queries", default="data/queries/expanded_queries.json")
     parser.add_argument("--corpus",  default=CORPUS_PATH)
     parser.add_argument("--config",  default="all",
                         help="C1, C2, C3, C4, or 'all'")
@@ -442,7 +442,15 @@ def main():
                         help="GPU device index for Zeus/NVML")
     parser.add_argument("--no-resume", action="store_true",
                         help="Restart from scratch (ignore existing logs)")
+    parser.add_argument("--schema", default=None,
+                        help="Path to JSON schema file. Defaults to STANDARD_SCHEMA.")
     args = parser.parse_args()
+
+    if args.schema:
+        import json
+        SCHEMA = json.load(open(args.schema))
+    else:
+        SCHEMA = STANDARD_SCHEMA
 
     # ── Load queries ─────────────────────────────────────────────────────────
     queries = json.loads(Path(args.queries).read_text())
@@ -478,7 +486,7 @@ def main():
         run_config(
             config_id    = config_id,
             queries      = queries,
-            schema       = STANDARD_SCHEMA,
+            schema       = SCHEMA,
             corpus       = corpus,
             monitor      = monitor,
             log_path     = log_path,
