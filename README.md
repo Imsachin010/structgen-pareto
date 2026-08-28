@@ -241,7 +241,7 @@ If you use this repository, please cite
 @inproceedings{mishra2026structgen,
   title={Reliability--Resource Tradeoffs in Structured Synthetic Data Generation},
   author={Mishra, Sachin and Kannan, Aswin},
-  booktitle={International Conference on Big Data Analytics (BDA)},
+  booktitle={International Conference on Big Data and Artificial Intelligence (BDA)},
   year={2026}
 }
 ```
@@ -271,3 +271,5 @@ Email: sachin.mishra@iiitb.ac.in
 ## Acknowledgements
 
 This work builds upon previous research on reliability-aware structured synthetic data generation and extends it with comprehensive resource profiling, empirical Pareto analysis, and deployment-oriented evaluation.
+
+> Mishra, S.: Reliability-aware structured synthetic data generation via schema enforcement and layered repair. In: Proceedings of the Workshop on Synthetic Data Generation and Management for Building AI Systems (SynthAI '26), pp. 7--12. Association for Computing Machinery, New York (2026). [doi:10.1145/3814574.3816747](https://doi.org/10.1145/3814574.3816747)
