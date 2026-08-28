@@ -1,0 +1,7 @@
+Generate a structured JSON object that describes the following scene query.
+You MUST output ONLY valid JSON matching this schema exactly:
+{schema_str}
+
+Scene query: {query}
+
+JSON output:

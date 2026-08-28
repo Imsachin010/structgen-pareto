@@ -1,0 +1,20 @@
+[Layer 1 - JSON Parse Failure]
+The following text is not valid JSON. Fix it so it is valid JSON matching this schema:
+{schema_str}
+
+Invalid text:
+{text}
+
+Fixed JSON only:
+
+[Layer 2 - Schema Validation Failure]
+The following JSON does not match the required schema.
+Schema:
+{schema_str}
+
+Error: {error_msg}
+
+Fix the JSON:
+{text}
+
+Fixed JSON only:

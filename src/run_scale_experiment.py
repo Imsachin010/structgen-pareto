@@ -248,6 +248,23 @@ def run_c1_baseline(query: str, schema: dict) -> dict:
     }
 
 
+def run_c1_5_enforce_only(query: str, schema: dict) -> dict:
+    """C1.5: Schema enforcement — NO repair loop."""
+    prompt  = _build_generation_prompt(query, schema)
+    text, p_tok, c_tok = _ollama_generate(prompt)
+    json_valid, schema_valid, obj = _validate_output(text, schema)
+    return {
+        "output":          text,
+        "json_valid":      json_valid,
+        "schema_valid":    schema_valid,
+        "parsed":          obj,
+        "repair_count":    0,
+        "prompt_tokens":   p_tok,
+        "completion_tokens": c_tok,
+        "retrieval_context": "",
+    }
+
+
 def run_c2_enforcement(query: str, schema: dict) -> dict:
     """C2: Schema enforcement + multi-layer repair loop."""
     prompt  = _build_generation_prompt(query, schema)
@@ -333,10 +350,11 @@ def run_c4_tfidf_rag(query: str, schema: dict, corpus: list[str]) -> dict:
 
 # Config dispatch table
 CONFIG_MAP = {
-    "C1": ("Raw Baseline",          "none"),
-    "C2": ("Schema + Repair",       "none"),
-    "C3": ("Schema + Repair + BGE", "embedding"),
-    "C4": ("Schema + Repair + TFIDF","tfidf"),
+    "C1":   ("Raw Baseline",          "none"),
+    "C1.5": ("Schema Enforce (No Repair)", "none"),
+    "C2":   ("Schema + Repair",       "none"),
+    "C3":   ("Schema + Repair + BGE", "embedding"),
+    "C4":   ("Schema + Repair + TFIDF","tfidf"),
 }
 
 
@@ -384,6 +402,8 @@ def run_config(config_id: str, queries: list[str], schema: dict,
                 with monitor.measure(record):
                     if config_id == "C1":
                         result = run_c1_baseline(query, schema)
+                    elif config_id == "C1.5":
+                        result = run_c1_5_enforce_only(query, schema)
                     elif config_id == "C2":
                         result = run_c2_enforcement(query, schema)
                     elif config_id == "C3":
@@ -447,13 +467,13 @@ def main():
     args = parser.parse_args()
 
     if args.schema:
-        import json
         SCHEMA = json.load(open(args.schema))
     else:
         SCHEMA = STANDARD_SCHEMA
 
     # ── Load queries ─────────────────────────────────────────────────────────
-    queries = json.loads(Path(args.queries).read_text())
+    raw_q = json.loads(Path(args.queries).read_text())
+    queries = [q["query"] if isinstance(q, dict) else q for q in raw_q]
     if args.limit:
         queries = queries[:args.limit]
     print(f"Loaded {len(queries)} queries.")

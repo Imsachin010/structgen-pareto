@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "required": ["scene_id", "environment", "entities", "interactions"],
+  "additionalProperties": false,
+  "properties": {
+    "scene_id": { "type": "string" },
+    "environment": {
+      "type": "object",
+      "required": ["setting", "lighting", "weather"],
+      "additionalProperties": false,
+      "properties": {
+        "setting":  { "type": "string" },
+        "lighting": { "type": "string", "enum": ["bright", "dim", "dark", "natural"] },
+        "weather":  { "type": "string" }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "count", "spatial_relations"],
+        "additionalProperties": false,
+        "properties": {
+          "name":  { "type": "string" },
+          "type":  { "type": "string", "enum": ["person", "animal", "vehicle", "object"] },
+          "count": { "type": "integer", "minimum": 1 },
+          "spatial_relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["relation", "reference", "distance_m"],
+              "additionalProperties": false,
+              "properties": {
+                "relation":   { "type": "string" },
+                "reference":  { "type": "string" },
+                "distance_m": { "type": "number", "minimum": 0 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "interactions": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

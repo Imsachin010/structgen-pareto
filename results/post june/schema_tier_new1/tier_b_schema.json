@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": ["scene_description", "location", "objects", "actions"],
+  "additionalProperties": false,
+  "properties": {
+    "scene_description": { "type": "string" },
+    "location": {
+      "type": "object",
+      "required": ["setting", "weather"],
+      "additionalProperties": false,
+      "properties": {
+        "setting": { "type": "string" },
+        "weather": { "type": "string" }
+      }
+    },
+    "objects": { "type": "array", "items": { "type": "string" } },
+    "actions": { "type": "array", "items": { "type": "string" } }
+  }
+}

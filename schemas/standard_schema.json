@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "required": ["scene_description", "objects", "actions"],
+  "additionalProperties": false,
+  "properties": {
+    "scene_description": { "type": "string" },
+    "objects": { "type": "array", "items": { "type": "string" } },
+    "actions": { "type": "array", "items": { "type": "string" } }
+  }
+}

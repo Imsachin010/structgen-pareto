@@ -233,7 +233,7 @@ The repository reproduces the principal findings reported in the paper, includin
 
 ---
 
-<!-- # Citation
+# Citation
 
 If you use this repository, please cite
 
@@ -244,7 +244,7 @@ If you use this repository, please cite
   booktitle={International Conference on Big Data Analytics (BDA)},
   year={2026}
 }
-``` -->
+```
 
 (Update this entry once the proceedings become available.)
 

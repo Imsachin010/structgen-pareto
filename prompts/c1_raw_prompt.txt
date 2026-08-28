@@ -1,0 +1,3 @@
+Describe this scene as a JSON object: {query}
+
+JSON:
