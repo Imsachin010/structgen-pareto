@@ -1,16 +1,29 @@
 cff-version: 1.2.0
-
-title: StructGen-Pareto
-
-message: >
-  If you use this repository, please cite the accompanying paper.
-
+title: "StructGen-Pareto"
+message: "If you use this software or data in your research, please cite the accompanying BDA 2026 paper."
+type: software
 authors:
-  - family-names: Mishra
-    given-names: Sachin
-  - family-names: Kannan
-    given-names: Aswin
-
-repository-code: https://github.com/Imsachin010/StructGen-Pareto
-
+  - family-names: "Mishra"
+    given-names: "Sachin"
+    orcid: "https://orcid.org/0009-0006-1184-8455"
+    affiliation: "International Institute of Information Technology Bangalore"
+  - family-names: "Kannan"
+    given-names: "Aswin"
+    orcid: "https://orcid.org/0000-0002-4698-7678"
+    affiliation: "International Institute of Information Technology Bangalore"
+repository-code: "https://github.com/Imsachin010/StructGen-Pareto"
 license: MIT
+preferred-citation:
+  type: conference-paper
+  title: "Reliability-Resource Tradeoffs in Structured Synthetic Data Generation"
+  authors:
+    - family-names: "Mishra"
+      given-names: "Sachin"
+      orcid: "https://orcid.org/0009-0006-1184-8455"
+      affiliation: "International Institute of Information Technology Bangalore"
+    - family-names: "Kannan"
+      given-names: "Aswin"
+      orcid: "https://orcid.org/0000-0002-4698-7678"
+      affiliation: "International Institute of Information Technology Bangalore"
+  collection-title: "International Conference on Big Data and Artificial Intelligence (BDA)"
+  year: 2026
